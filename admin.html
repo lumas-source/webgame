@@ -1,0 +1,1551 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Bonanza - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --secondary: #ff6b6b;
+            --accent: #6bff94;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7f9;
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .menu-item:hover, .menu-item.active {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .menu-item i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+            .tab.active {
+                border-bottom: 3px solid var(--primary);
+                color: var(--primary);
+                font-weight: 500;
+            }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 600px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .form-group input, .form-group select, .form-group textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        }
+
+        .login-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            max-width: 90%;
+        }
+
+            .login-form h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+        /* Screenshot Preview Styles */
+        .screenshot-preview {
+            margin-top: 10px;
+            text-align: center;
+            border: 1px dashed #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .screenshot-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .screenshot-placeholder {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .screenshot-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screenshot-modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .screenshot-modal-img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 5px;
+        }
+
+        .screenshot-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+
+            .sidebar-header span, .menu-item span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen (initially visible) -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-form">
+            <h2>Admin Login</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Admin username" value="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Admin password" value="admin123">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" id="loginBtn">Login</button>
+            <p id="loginError" style="color: red; margin-top: 10px; display: none;">Invalid credentials</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel (initially hidden) -->
+    <div id="adminPanel" style="display: none; width: 100%;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Bingo Bonanza</h2>
+                <p>Admin Panel</p>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" data-tab="deposits">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Deposit Requests</span>
+                </div>
+                <div class="menu-item" data-tab="withdrawals">
+                    <i class="fas fa-wallet"></i>
+                    <span>Withdrawal Requests</span>
+                </div>
+                <div class="menu-item" data-tab="players">
+                    <i class="fas fa-users"></i>
+                    <span>Players</span>
+                </div>
+                <div class="menu-item" data-tab="winners">
+                    <i class="fas fa-trophy"></i>
+                    <span>Winners</span>
+                </div>
+                <div class="menu-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+                <div class="menu-item" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Players</span>
+                        <span class="stat-value" id="totalPlayers">0</span>
+                        <span id="playersChange">+0 this week</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Active Games</span>
+                        <span class="stat-value" id="activeGames">0</span>
+                        <span id="playersOnline">0 players online</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Pending Deposits</span>
+                        <span class="stat-value" id="pendingDepositsAmount">₦ 0</span>
+                        <span id="pendingDepositsCount">0 requests</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Pending Withdrawals</span>
+                        <span class="stat-value" id="pendingWithdrawalsAmount">₦ 0</span>
+                        <span id="pendingWithdrawalsCount">0 requests</span>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <button class="btn btn-primary" id="refreshActivityBtn">Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Action</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivityTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No recent activity</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Winners -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Winners</h3>
+                        <button class="btn btn-primary" id="refreshWinnersBtn">Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Phone</th>
+                                <th>Amount Won</th>
+                                <th>Game</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentWinnersTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No recent winners</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Deposits Tab -->
+            <div id="deposits" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Deposit Requests</h3>
+                        <div class="filters">
+                            <select class="filter-item" id="depositStatusFilter">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <input type="date" class="filter-item" id="depositDateFilter">
+                            <button class="btn btn-primary" id="filterDepositsBtn">Filter</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Phone</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositsTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No deposit requests</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Withdrawals Tab -->
+            <div id="withdrawals" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Withdrawal Requests</h3>
+                        <div class="filters">
+                            <select class="filter-item" id="withdrawalStatusFilter">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <input type="date" class="filter-item" id="withdrawalDateFilter">
+                            <button class="btn btn-primary" id="filterWithdrawalsBtn">Filter</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Phone</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Account Info</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No withdrawal requests</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Players Tab -->
+            <div id="players" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Player Management</h3>
+                        <div class="filters">
+                            <input type="text" id="playerSearch" placeholder="Search players..." class="filter-item">
+                            <button class="btn btn-primary" id="searchPlayersBtn">Search</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Phone</th>
+                                <th>Balance</th>
+                                <th>Games Played</th>
+                                <th>Total Won</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No players found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Winners Tab -->
+            <div id="winners" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Winner History</h3>
+                        <div class="filters">
+                            <input type="month" class="filter-item" id="winnerMonthFilter">
+                            <button class="btn btn-primary" id="filterWinnersBtn">Filter</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Game ID</th>
+                                <th>Winner</th>
+                                <th>Phone</th>
+                                <th>Amount Won</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="winnersTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No winners found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Payment Settings</h3>
+                    </div>
+                    <div class="form-group">
+                        <label>Telebirr Account Number</label>
+                        <input type="text" value="0996271241" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Telebirr Account Name</label>
+                        <input type="text" value="Kasim Ebrahim / ቃሲም ኢብራሂም" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>House Cut Percentage</label>
+                        <input type="number" value="20">
+                    </div>
+                    <button class="btn btn-primary">Save Settings</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Admin Users</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>admin</td>
+                                <td>Super Admin</td>
+                                <td id="adminLastLogin">10 Nov 2023, 14:32</td>
+                                <td>
+                                    <button class="btn btn-primary">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Approve Deposit</h3>
+                <button class="modal-close" id="closeDepositModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Player</label>
+                <input type="text" id="depositPlayer" readonly>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="text" id="depositAmount" readonly>
+            </div>
+            <div class="form-group">
+                <label>Reference Number</label>
+                <input type="text" id="depositReference" readonly>
+            </div>
+            <div class="form-group">
+                <label>Telebirr Transaction ID</label>
+                <input type="text" id="depositTransactionId" placeholder="Enter transaction ID">
+            </div>
+            <div class="form-group">
+                <label>Payment Screenshot</label>
+                <div class="screenshot-preview" id="screenshotPreview">
+                    <div class="screenshot-placeholder" id="screenshotPlaceholder">No screenshot available</div>
+                    <img src="" alt="Payment screenshot" class="screenshot-img" id="screenshotImg" style="display: none;">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success" id="confirmApproveDepositBtn">Confirm Approval</button>
+                <button class="btn btn-danger" id="cancelDepositBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="withdrawalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Process Withdrawal</h3>
+                <button class="modal-close" id="closeWithdrawalModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Player</label>
+                <input type="text" id="withdrawalPlayer" readonly>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="text" id="withdrawalAmount" readonly>
+            </div>
+            <div class="form-group">
+                <label>Telebirr Account</label>
+                <input type="text" id="withdrawalAccount" readonly>
+            </div>
+            <div class="form-group">
+                <label>Transaction Reference</label>
+                <input type="text" id="withdrawalTransactionRef" placeholder="Enter transaction reference">
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success" id="confirmProcessWithdrawalBtn">Mark as Paid</button>
+                <button class="btn btn-danger" id="cancelWithdrawalBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Player Details</h3>
+                <button class="modal-close" id="closePlayerModal">&times;</button>
+            </div>
+            <div class="tab-container">
+                <div class="tab active" data-tab="player-info">Info</div>
+                <div class="tab" data-tab="player-transactions">Transactions</div>
+                <div class="tab" data-tab="player-games">Game History</div>
+            </div>
+
+            <div id="player-info" class="tab-content active">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="playerUsername" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="playerPhone" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Balance</label>
+                    <input type="text" id="playerBalance" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Total Deposits</label>
+                    <input type="text" id="playerTotalDeposits" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Total Withdrawals</label>
+                    <input type="text" id="playerTotalWithdrawals" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Total Winnings</label>
+                    <input type="text" id="playerTotalWinnings" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Registration Date</label>
+                    <input type="text" id="playerRegistrationDate" readonly>
+                </div>
+            </div>
+
+            <div id="player-transactions" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerTransactionsTable">
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No transactions found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="player-games" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Game ID</th>
+                            <th>Result</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerGamesTable">
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No games found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="closePlayerModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screenshot Modal -->
+    <div id="screenshotModal" class="screenshot-modal">
+        <div class="screenshot-modal-close" id="closeScreenshotModal">&times;</div>
+        <div class="screenshot-modal-content">
+            <img src="" alt="Payment screenshot" class="screenshot-modal-img" id="screenshotModalImg">
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentDepositId = null;
+        let currentWithdrawalId = null;
+        let allDeposits = [];
+        let allWithdrawals = [];
+        let allPlayers = [];
+        let allWinners = [];
+
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Login function
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'flex';
+                    document.getElementById('adminLastLogin').textContent = new Date().toLocaleString();
+                    loadDashboardData();
+                } else {
+                    document.getElementById('loginError').textContent = data.error;
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('loginError').textContent = 'Network error. Please try again.';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/admin/logout', {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // First try to get real data from API
+                try {
+                    const [playersRes, depositsRes, withdrawalsRes, winnersRes, statsRes] = await Promise.all([
+                        fetch('/api/admin/players'),
+                        fetch('/api/admin/deposits'),
+                        fetch('/api/admin/withdrawals'),
+                        fetch('/api/admin/winners'),
+                        fetch('/api/admin/stats')
+                    ]);
+
+                    if (playersRes.ok && depositsRes.ok && withdrawalsRes.ok && winnersRes.ok && statsRes.ok) {
+                        const players = await playersRes.json();
+                        const deposits = await depositsRes.json();
+                        const withdrawals = await withdrawalsRes.json();
+                        const winners = await winnersRes.json();
+                        const stats = await statsRes.json();
+
+                        allDeposits = deposits;
+                        allWithdrawals = withdrawals;
+                        allPlayers = players;
+                        allWinners = winners;
+
+                        updateDashboardUI(players, deposits, withdrawals, winners, stats);
+                        return;
+                    }
+                } catch (apiError) {
+                    console.log('API not available, using mock data', apiError);
+                }
+
+                // Fallback to mock data if API is not available
+                const mockPlayers = [
+                    { username: 'player1', phone: '251912345678', balance: 1500, createdAt: '2023-11-10' },
+                    { username: 'player2', phone: '251987654321', balance: 750, createdAt: '2023-11-11' },
+                    { username: 'player3', phone: '251911223344', balance: 2300, createdAt: '2023-11-12' }
+                ];
+
+                const mockDeposits = [
+                    {
+                        id: 'dep1',
+                        username: 'player1',
+                        phone: '251912345678',
+                        amount: 500,
+                        createdAt: '2023-11-15',
+                        reference: 'REF123',
+                        status: 'pending',
+                        screenshot: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGF5bWVudCBTY3JlZW5zaG90PC90ZXh0Pjwvc3ZnPg=='
+                    },
+                    {
+                        id: 'dep2',
+                        username: 'player2',
+                        phone: '251987654321',
+                        amount: 300,
+                        createdAt: '2023-11-14',
+                        reference: 'REF456',
+                        status: 'approved',
+                        screenshot: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1iZGRsZSI+UGF5bWVudCBTY3JlZW5zaG90PC90ZXh0Pjwvc3ZnPg=='
+                    },
+                    {
+                        id: 'dep3',
+                        username: 'player3',
+                        phone: '251911223344',
+                        amount: 1000,
+                        createdAt: '2023-11-13',
+                        reference: 'REF789',
+                        status: 'rejected',
+                        screenshot: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGF5bWVudCBTY3JlZW5zaG90PC90ZXh0Pjwvc3ZnPg=='
+                    }
+                ];
+
+                const mockWithdrawals = [
+                    { id: 'wd1', username: 'player1', phone: '251912345678', amount: 200, createdAt: '2023-11-15', accountNumber: '0996271241', status: 'pending' },
+                    { id: 'wd2', username: 'player2', phone: '251987654321', amount: 150, createdAt: '2023-11-14', accountNumber: '0996271241', status: 'approved' },
+                    { id: 'wd3', username: 'player3', phone: '251911223344', amount: 500, createdAt: '2023-11-13', accountNumber: '0996271241', status: 'rejected' }
+                ];
+
+                const mockWinners = [
+                    { username: 'player1', phone: '251912345678', amount: 1000, game: 'Bingo #123', createdAt: '2023-11-15' },
+                    { username: 'player2', phone: '251987654321', amount: 500, game: 'Bingo #122', createdAt: '2023-11-14' },
+                    { username: 'player3', phone: '251911223344', amount: 1500, game: 'Bingo #121', createdAt: '2023-11-13' }
+                ];
+
+                const mockStats = {
+                    totalPlayers: 3,
+                    activeGames: 5,
+                    pendingDepositsAmount: 500,
+                    pendingDepositsCount: 1,
+                    pendingWithdrawalsAmount: 200,
+                    pendingWithdrawalsCount: 1
+                };
+
+                allDeposits = mockDeposits;
+                allWithdrawals = mockWithdrawals;
+                allPlayers = mockPlayers;
+                allWinners = mockWinners;
+
+                updateDashboardUI(mockPlayers, mockDeposits, mockWithdrawals, mockWinners, mockStats);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Update dashboard UI with data
+        function updateDashboardUI(players, deposits, withdrawals, winners, stats) {
+            // Update stats cards
+            document.getElementById('totalPlayers').textContent = stats.totalPlayers || players.length;
+            document.getElementById('activeGames').textContent = stats.activeGames || 5;
+            document.getElementById('pendingDepositsAmount').textContent = `₦ ${stats.pendingDepositsAmount || 500}`;
+            document.getElementById('pendingDepositsCount').textContent = `${stats.pendingDepositsCount || 1} requests`;
+            document.getElementById('pendingWithdrawalsAmount').textContent = `₦ ${stats.pendingWithdrawalsAmount || 200}`;
+            document.getElementById('pendingWithdrawalsCount').textContent = `${stats.pendingWithdrawalsCount || 1} requests`;
+
+            // Update recent activity table
+            const activityTable = document.getElementById('recentActivityTable');
+            activityTable.innerHTML = '';
+
+            const recentDeposits = [...deposits].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            const recentWithdrawals = [...withdrawals].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+            const recentActivity = [...recentDeposits.map(d => ({ ...d, type: 'deposit' })),
+            ...recentWithdrawals.map(w => ({ ...w, type: 'withdrawal' }))]
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 5);
+
+            if (recentActivity.length === 0) {
+                activityTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No recent activity</td></tr>';
+            } else {
+                recentActivity.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${item.username}</td>
+                            <td>${item.type === 'deposit' ? 'Deposit' : 'Withdrawal'}</td>
+                            <td>₦ ${item.amount}</td>
+                            <td>${new Date(item.createdAt).toLocaleDateString()}</td>
+                            <td><span class="status-badge status-${item.status}">${item.status}</span></td>
+                        `;
+                    activityTable.appendChild(row);
+                });
+            }
+
+            // Update recent winners table
+            const winnersTable = document.getElementById('recentWinnersTable');
+            winnersTable.innerHTML = '';
+
+            const recentWinners = [...winners].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+            if (recentWinners.length === 0) {
+                winnersTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No recent winners</td></tr>';
+            } else {
+                recentWinners.forEach(winner => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${winner.username}</td>
+                            <td>${winner.phone}</td>
+                            <td>₦ ${winner.amount}</td>
+                            <td>${winner.game}</td>
+                            <td>${new Date(winner.createdAt).toLocaleDateString()}</td>
+                        `;
+                    winnersTable.appendChild(row);
+                });
+            }
+
+            // Update the deposits table
+            updateDepositsTable(deposits);
+        }
+
+        // Update deposits table
+        function updateDepositsTable(deposits) {
+            const depositsTable = document.getElementById('depositsTable');
+            depositsTable.innerHTML = '';
+
+            if (deposits.length === 0) {
+                depositsTable.innerHTML = '<tr><td colspan="7" style="text-align: center;">No deposit requests</td></tr>';
+                return;
+            }
+
+            deposits.forEach(deposit => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${deposit.username}</td>
+                        <td>${deposit.phone}</td>
+                        <td>₦ ${deposit.amount}</td>
+                        <td>${new Date(deposit.createdAt).toLocaleDateString()}</td>
+                        <td>${deposit.reference}</td>
+                        <td><span class="status-badge status-${deposit.status}">${deposit.status}</span></td>
+                        <td>
+                            ${deposit.status === 'pending' ?
+                        `<button class="btn btn-success view-deposit" data-id="${deposit.id}">Review</button>` :
+                        `<button class="btn btn-primary view-deposit" data-id="${deposit.id}">View</button>`
+                    }
+                        </td>
+                    `;
+                depositsTable.appendChild(row);
+            });
+
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-deposit').forEach(button => {
+                button.addEventListener('click', function () {
+                    const depositId = this.getAttribute('data-id');
+                    openDepositModal(depositId);
+                });
+            });
+        }
+
+        // Update withdrawals table
+        function updateWithdrawalsTable(withdrawals) {
+            const withdrawalsTable = document.getElementById('withdrawalsTable');
+            withdrawalsTable.innerHTML = '';
+
+            if (withdrawals.length === 0) {
+                withdrawalsTable.innerHTML = '<tr><td colspan="7" style="text-align: center;">No withdrawal requests</td></tr>';
+                return;
+            }
+
+            withdrawals.forEach(withdrawal => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${withdrawal.username}</td>
+                        <td>${withdrawal.phone}</td>
+                        <td>₦ ${withdrawal.amount}</td>
+                        <td>${new Date(withdrawal.createdAt).toLocaleDateString()}</td>
+                        <td>${withdrawal.accountNumber}</td>
+                        <td><span class="status-badge status-${withdrawal.status}">${withdrawal.status}</span></td>
+                        <td>
+                            ${withdrawal.status === 'pending' ?
+                        `<button class="btn btn-success view-withdrawal" data-id="${withdrawal.id}">Process</button>` :
+                        `<button class="btn btn-primary view-withdrawal" data-id="${withdrawal.id}">View</button>`
+                    }
+                        </td>
+                    `;
+                withdrawalsTable.appendChild(row);
+            });
+
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-withdrawal').forEach(button => {
+                button.addEventListener('click', function () {
+                    const withdrawalId = this.getAttribute('data-id');
+                    openWithdrawalModal(withdrawalId);
+                });
+            });
+        }
+
+        // Update players table
+        function updatePlayersTable(players) {
+            const playersTable = document.getElementById('playersTable');
+            playersTable.innerHTML = '';
+
+            if (players.length === 0) {
+                playersTable.innerHTML = '<tr><td colspan="7" style="text-align: center;">No players found</td></tr>';
+                return;
+            }
+
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${player.username}</td>
+                        <td>${player.phone}</td>
+                        <td>₦ ${player.balance}</td>
+                        <td>${player.gamesPlayed || 0}</td>
+                        <td>₦ ${player.totalWon || 0}</td>
+                        <td><span class="status-badge status-${player.status || 'active'}">${player.status || 'active'}</span></td>
+                        <td>
+                            <button class="btn btn-primary view-player" data-id="${player.username}">View</button>
+                        </td>
+                    `;
+                playersTable.appendChild(row);
+            });
+
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-player').forEach(button => {
+                button.addEventListener('click', function () {
+                    const playerId = this.getAttribute('data-id');
+                    openPlayerModal(playerId);
+                });
+            });
+        }
+
+        // Update winners table
+        function updateWinnersTable(winners) {
+            const winnersTable = document.getElementById('winnersTable');
+            winnersTable.innerHTML = '';
+
+            if (winners.length === 0) {
+                winnersTable.innerHTML = '<tr><td colspan="7" style="text-align: center;">No winners found</td></tr>';
+                return;
+            }
+
+            winners.forEach(winner => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${new Date(winner.createdAt).toLocaleDateString()}</td>
+                        <td>${winner.game}</td>
+                        <td>${winner.username}</td>
+                        <td>${winner.phone}</td>
+                        <td>₦ ${winner.amount}</td>
+                        <td><span class="status-badge status-${winner.status || 'paid'}">${winner.status || 'paid'}</span></td>
+                        <td>
+                            <button class="btn btn-primary">Details</button>
+                        </td>
+                    `;
+                winnersTable.appendChild(row);
+            });
+        }
+
+        // Open deposit modal
+        function openDepositModal(depositId) {
+            const deposit = allDeposits.find(d => d.id === depositId);
+            if (!deposit) return;
+
+            currentDepositId = depositId;
+
+            document.getElementById('depositPlayer').value = deposit.username;
+            document.getElementById('depositAmount').value = `₦ ${deposit.amount}`;
+            document.getElementById('depositReference').value = deposit.reference;
+            document.getElementById('depositTransactionId').value = '';
+
+            // Set screenshot preview
+            const screenshotImg = document.getElementById('screenshotImg');
+            const screenshotPlaceholder = document.getElementById('screenshotPlaceholder');
+
+            if (deposit.screenshot) {
+                screenshotImg.src = deposit.screenshot;
+                screenshotImg.style.display = 'block';
+                screenshotPlaceholder.style.display = 'none';
+            } else {
+                screenshotImg.style.display = 'none';
+                screenshotPlaceholder.style.display = 'block';
+                screenshotPlaceholder.textContent = 'No screenshot available';
+            }
+
+            // Show modal
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+
+        // Open withdrawal modal
+        function openWithdrawalModal(withdrawalId) {
+            const withdrawal = allWithdrawals.find(w => w.id === withdrawalId);
+            if (!withdrawal) return;
+
+            currentWithdrawalId = withdrawalId;
+
+            document.getElementById('withdrawalPlayer').value = withdrawal.username;
+            document.getElementById('withdrawalAmount').value = `₦ ${withdrawal.amount}`;
+            document.getElementById('withdrawalAccount').value = withdrawal.accountNumber;
+            document.getElementById('withdrawalTransactionRef').value = '';
+
+            // Show modal
+            document.getElementById('withdrawalModal').style.display = 'flex';
+        }
+
+        // Open player modal
+        function openPlayerModal(playerId) {
+            const player = allPlayers.find(p => p.username === playerId);
+            if (!player) return;
+
+            document.getElementById('playerUsername').value = player.username;
+            document.getElementById('playerPhone').value = player.phone;
+            document.getElementById('playerBalance').value = `₦ ${player.balance}`;
+            document.getElementById('playerTotalDeposits').value = `₦ ${player.totalDeposits || 0}`;
+            document.getElementById('playerTotalWithdrawals').value = `₦ ${player.totalWithdrawals || 0}`;
+            document.getElementById('playerTotalWinnings').value = `₦ ${player.totalWon || 0}`;
+            document.getElementById('playerRegistrationDate').value = new Date(player.createdAt).toLocaleDateString();
+
+            // Show modal
+            document.getElementById('playerModal').style.display = 'flex';
+        }
+
+        // Close modals
+        function closeModals() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('withdrawalModal').style.display = 'none';
+            document.getElementById('playerModal').style.display = 'none';
+            document.getElementById('screenshotModal').style.display = 'none';
+        }
+
+        // Approve deposit
+        async function approveDeposit() {
+            const transactionId = document.getElementById('depositTransactionId').value;
+            if (!transactionId) {
+                alert('Please enter a Telebirr transaction ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/deposits/${currentDepositId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ transactionId })
+                });
+
+                if (response.ok) {
+                    // Update the deposit status in our local data
+                    const depositIndex = allDeposits.findIndex(d => d.id === currentDepositId);
+                    if (depositIndex !== -1) {
+                        allDeposits[depositIndex].status = 'approved';
+                        updateDepositsTable(allDeposits);
+                    }
+
+                    closeModals();
+                    loadDashboardData(); // Refresh dashboard stats
+                } else {
+                    alert('Failed to approve deposit');
+                }
+            } catch (error) {
+                console.error('Error approving deposit:', error);
+                alert('Error approving deposit');
+            }
+        }
+
+        // Process withdrawal
+        async function processWithdrawal() {
+            const transactionRef = document.getElementById('withdrawalTransactionRef').value;
+            if (!transactionRef) {
+                alert('Please enter a transaction reference');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/withdrawals/${currentWithdrawalId}/process`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ transactionRef })
+                });
+
+                if (response.ok) {
+                    // Update the withdrawal status in our local data
+                    const withdrawalIndex = allWithdrawals.findIndex(w => w.id === currentWithdrawalId);
+                    if (withdrawalIndex !== -1) {
+                        allWithdrawals[withdrawalIndex].status = 'approved';
+                        updateWithdrawalsTable(allWithdrawals);
+                    }
+
+                    closeModals();
+                    loadDashboardData(); // Refresh dashboard stats
+                } else {
+                    alert('Failed to process withdrawal');
+                }
+            } catch (error) {
+                console.error('Error processing withdrawal:', error);
+                alert('Error processing withdrawal');
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('loginBtn').addEventListener('click', login);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Menu navigation
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function () {
+                if (this.id === 'logoutBtn') return;
+
+                const tab = this.getAttribute('data-tab');
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(tab).classList.add('active');
+
+                document.getElementById('pageTitle').textContent = this.querySelector('span').textContent;
+
+                // Load data for the selected tab
+                if (tab === 'deposits') {
+                    updateDepositsTable(allDeposits);
+                } else if (tab === 'withdrawals') {
+                    updateWithdrawalsTable(allWithdrawals);
+                } else if (tab === 'players') {
+                    updatePlayersTable(allPlayers);
+                } else if (tab === 'winners') {
+                    updateWinnersTable(allWinners);
+                }
+            });
+        });
+
+        // Modal close buttons
+        document.getElementById('closeDepositModal').addEventListener('click', closeModals);
+        document.getElementById('closeWithdrawalModal').addEventListener('click', closeModals);
+        document.getElementById('closePlayerModal').addEventListener('click', closeModals);
+        document.getElementById('closePlayerModalBtn').addEventListener('click', closeModals);
+        document.getElementById('closeScreenshotModal').addEventListener('click', closeModals);
+
+        // Cancel buttons
+        document.getElementById('cancelDepositBtn').addEventListener('click', closeModals);
+        document.getElementById('cancelWithdrawalBtn').addEventListener('click', closeModals);
+
+        // Action buttons
+        document.getElementById('confirmApproveDepositBtn').addEventListener('click', approveDeposit);
+        document.getElementById('confirmProcessWithdrawalBtn').addEventListener('click', processWithdrawal);
+
+        // Refresh buttons
+        document.getElementById('refreshActivityBtn').addEventListener('click', loadDashboardData);
+        document.getElementById('refreshWinnersBtn').addEventListener('click', loadDashboardData);
+
+        // Filter buttons
+        document.getElementById('filterDepositsBtn').addEventListener('click', function () {
+            const statusFilter = document.getElementById('depositStatusFilter').value;
+            const dateFilter = document.getElementById('depositDateFilter').value;
+
+            let filteredDeposits = allDeposits;
+
+            if (statusFilter !== 'all') {
+                filteredDeposits = filteredDeposits.filter(d => d.status === statusFilter);
+            }
+
+            if (dateFilter) {
+                filteredDeposits = filteredDeposits.filter(d => {
+                    const depositDate = new Date(d.createdAt).toISOString().split('T')[0];
+                    return depositDate === dateFilter;
+                });
+            }
+
+            updateDepositsTable(filteredDeposits);
+        });
+
+        document.getElementById('filterWithdrawalsBtn').addEventListener('click', function () {
+            const statusFilter = document.getElementById('withdrawalStatusFilter').value;
+            const dateFilter = document.getElementById('withdrawalDateFilter').value;
+
+            let filteredWithdrawals = allWithdrawals;
+
+            if (statusFilter !== 'all') {
+                filteredWithdrawals = filteredWithdrawals.filter(w => w.status === statusFilter);
+            }
+
+            if (dateFilter) {
+                filteredWithdrawals = filteredWithdrawals.filter(w => {
+                    const withdrawalDate = new Date(w.createdAt).toISOString().split('T')[0];
+                    return withdrawalDate === dateFilter;
+                });
+            }
+
+            updateWithdrawalsTable(filteredWithdrawals);
+        });
+
+        // Screenshot preview
+        document.getElementById('screenshotImg').addEventListener('click', function () {
+            if (this.style.display !== 'none') {
+                document.getElementById('screenshotModalImg').src = this.src;
+                document.getElementById('screenshotModal').style.display = 'flex';
+            }
+        });
+
+        // Player tabs
+        document.querySelectorAll('#playerModal .tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const tabId = this.getAttribute('data-tab');
+
+                document.querySelectorAll('#playerModal .tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                document.querySelectorAll('#playerModal .tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Initialize with dashboard data
+        if (document.getElementById('adminPanel').style.display !== 'none') {
+            loadDashboardData();
+        }
+    </script>
+</body>
+</html>

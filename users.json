@@ -1,0 +1,14 @@
+{
+  "testuser": {
+    "password": "$2a$10$X8W5O9r3E7I6U5Y2T1R2E.1Q2W3E4R5T6Y7U8I9O0P1A2S3D4F5G6H7J8K9L0",
+    "phone": "251912345678",
+    "balance": 500,
+    "createdAt": "2023-11-10T14:32:00.000Z"
+  },
+  "harun": {
+    "password": "$2a$10$ak8y6HGhoVFWo.pMV41xwueC0yxPIx9EzPzbkCnkOMl4D4WGf2bpW",
+    "phone": "0996271241",
+    "balance": 566,
+    "createdAt": "2025-09-06T16:24:25.961Z"
+  }
+}
